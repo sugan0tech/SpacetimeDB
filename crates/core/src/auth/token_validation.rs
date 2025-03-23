@@ -259,8 +259,8 @@ impl TokenValidator for OidcTokenValidator {
     async fn validate_token(&self, token: &str) -> Result<SpacetimeIdentityClaims, TokenValidationError> {
         // TODO: Make this stored in the struct so we don't need to keep creating it.
         let raw_issuer = get_raw_issuer(token)?;
-        // TODO: Consider checking for trailing slashes or requiring a scheme.
-        let oidc_url = format!("{}/.well-known/openid-configuration", raw_issuer);
+        let cleaned_issuer = raw_issuer.trim_end_matches('/');
+        let oidc_url = format!("{}/.well-known/openid-configuration", cleaned_issuer);
         log::debug!("Fetching key for issuer {}", raw_issuer.clone());
         let key_or_error = Jwks::from_oidc_url(oidc_url).await;
         // TODO: We should probably add debouncing to avoid spamming the logs.
